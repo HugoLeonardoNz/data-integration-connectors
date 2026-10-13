@@ -8,7 +8,7 @@ import pytest
 
 from conectores import saude
 from conectores.cliente import FonteIndisponivel
-from conectores.fontes import LEADS, PRODUTOS
+from conectores.fontes import CAMPANHAS, LEADS, PRODUTOS
 
 
 def test_rotina_em_dia_nao_tem_problema(rodar, conn):
@@ -59,3 +59,23 @@ def test_falha_repetida_avisa_uma_vez_e_avisa_de_novo_quando_volta(rodar, caos, 
 
     assert len(avisos) == 2
     assert "voltou ao normal" in avisos[1]
+
+
+def test_contagem_que_nao_confere_aparece_no_status(rodar, conn, mundo):
+    mundo.produtos["rota-sul"][30]["price"] = -10
+
+    rodar(PRODUTOS)
+
+    (rotina,) = saude.situacao(conn)
+    assert rotina.problema == "contagem não confere com a fonte"
+    assert rotina.rejeitados == 1
+
+
+def test_item_recusado_aparece_no_status_mesmo_sem_conferencia(rodar, conn, mundo):
+    """Campanhas não têm contagem na fonte. O item recusado é o único sinal."""
+    mundo.insights["rota-sul"][0]["spend"] = -1
+
+    rodar(CAMPANHAS)
+
+    (rotina,) = saude.situacao(conn)
+    assert rotina.problema == "1 item(ns) recusado(s)"
