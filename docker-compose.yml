@@ -1,0 +1,39 @@
+# docker compose up -d                      banco + API simulada
+# docker compose --profile agendado up -d   + o ciclo rodando a cada 15 minutos
+
+services:
+  banco:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: conectores
+      POSTGRES_USER: conectores
+      POSTGRES_PASSWORD: conectores
+    ports:
+      - "5544:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conectores"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  simulador:
+    build: .
+    command: uvicorn simulador.app:app --host 0.0.0.0 --port 8090
+    ports:
+      - "8090:8090"
+
+  agendador:
+    build: .
+    profiles: ["agendado"]
+    # Se o banco reiniciar, o processo cai e volta sozinho. A execução que
+    # ficou aberta é registrada como interrompida pela seguinte.
+    restart: unless-stopped
+    command: sh -c "python -m conectores migrar && python -m conectores agendar --intervalo 900"
+    environment:
+      DATABASE_URL: postgresql://conectores:conectores@banco:5432/conectores
+      API_URL: http://simulador:8090
+    depends_on:
+      banco:
+        condition: service_healthy
+      simulador:
+        condition: service_started

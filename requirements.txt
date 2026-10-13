@@ -1,0 +1,5 @@
+# Versões fechadas: a mesma instalação aqui, no CI e na imagem Docker.
+httpx==0.28.1
+psycopg[binary]==3.3.6
+fastapi==0.143.0
+uvicorn==0.54.0

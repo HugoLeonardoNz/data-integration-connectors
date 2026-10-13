@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: conectores
+          POSTGRES_USER: conectores
+          POSTGRES_PASSWORD: conectores
+        ports:
+          - 5544:5432
+        options: >-
+          --health-cmd "pg_isready -U conectores"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements-dev.txt
+
+      - name: Ruff
+        run: ruff check .
+
+      - name: Testes contra PostgreSQL
+        run: pytest -v
+
+  # O que o README manda fazer, numa máquina limpa: sobe tudo com Docker,
+  # carrega, roda de novo e confere que a segunda passada não mudou nada.
+  readme:
+    runs-on: ubuntu-latest
+    env:
+      RODAR: docker compose --profile agendado run --rm -T agendador python -m conectores
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sobe o banco e a API simulada
+        run: docker compose up -d --build --wait banco simulador
+
+      - name: Carga inicial
+        run: |
+          $RODAR migrar
+          $RODAR ciclo
+
+      - name: A segunda passada não insere nem altera nada
+        run: |
+          $RODAR ciclo | tee segunda.txt
+          test "$(wc -l < segunda.txt)" -eq 15
+          ! grep -v "novas     0  alteradas     0" segunda.txt
+
+      - name: Todas as rotinas em dia
+        run: $RODAR status
