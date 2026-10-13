@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from conectores import cli, config
+import psycopg
+import pytest
+
+from conectores import banco, cli, config, fontes
 
 
 def test_ciclo_completo_e_status_pela_linha_de_comando(
@@ -26,3 +29,11 @@ def test_status_sem_nenhuma_execucao_acusa_problema(conn, banco_de_teste, monkey
     monkeypatch.setattr(config, "DATABASE_URL", banco_de_teste)
 
     assert cli.main(["status"]) == 1
+
+
+def test_ciclo_sem_banco_derruba_o_processo_em_vez_de_seguir_calado(conn, banco_de_teste):
+    perdida = banco.conectar(banco_de_teste)
+    perdida.close()
+
+    with pytest.raises(psycopg.OperationalError):
+        cli._ciclo(perdida, None, [fontes.PRODUTOS], ["rota-sul"])

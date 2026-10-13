@@ -40,6 +40,10 @@ def _ciclo(conn, cliente, recursos, empresas) -> int:
             except JaEmExecucao:
                 log.warning("%s %s: já está rodando, pulado", recurso.rotulo, empresa)
             except Exception:
+                if conn.closed:
+                    # Sem banco não há ciclo. O processo cai, e quem o agenda
+                    # (cron, Docker) sobe outro com conexão nova.
+                    raise
                 falhas += 1  # o motor já registrou a falha e avisou
             else:
                 c = r.contagem

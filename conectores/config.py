@@ -3,6 +3,21 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+
+def _carregar_env() -> None:
+    """Lê o `.env` da raiz do projeto, se existir. O que já está no ambiente vale mais."""
+    arquivo = Path(__file__).resolve().parent.parent / ".env"
+    if not arquivo.exists():
+        return
+    for linha in arquivo.read_text(encoding="utf-8").splitlines():
+        chave, igual, valor = linha.partition("=")
+        if igual and not chave.lstrip().startswith("#"):
+            os.environ.setdefault(chave.strip(), valor.strip())
+
+
+_carregar_env()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://conectores:conectores@localhost:5544/conectores"

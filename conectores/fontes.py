@@ -80,6 +80,9 @@ def por_janela(
             )
             itens = _itens(corpo, caminho)
             if itens:
+                # Como em `por_alteracao`, conta com a fonte devolvendo os dias
+                # em ordem: o marcador de uma página não pode passar à frente
+                # de um dia que ainda está numa página seguinte.
                 lidos = [str(i[campo]) for i in itens if i.get(campo)]
                 yield Pagina(itens, max(lidos) if lidos else None)
             if numero >= int(corpo.get("total_pages", 1)):

@@ -14,7 +14,7 @@ O simulador imita o que dá trabalho numa API de verdade: OAuth com token que ve
 
 Não é um sistema em produção e os dados são fictícios (um grupo de turismo com três empresas).
 
-**Com cinco minutos:** leia [`conectores/motor.py`](conectores/motor.py) e [`docs/decisoes.md`](docs/decisoes.md). **Com dez:** rode os quatro comandos de [Como rodar](#como-rodar) e provoque uma falha.
+**Com cinco minutos:** leia [`conectores/motor.py`](conectores/motor.py) e [`docs/decisoes.md`](docs/decisoes.md). **Com dez:** rode os comandos de [Como rodar](#como-rodar) e provoque uma falha.
 
 ## O que ele garante, e onde está a prova
 
@@ -135,6 +135,7 @@ Escreva a função que converte um item e registre um `Recurso` em `fontes.py`, 
 ## Limites
 
 - **Exclusão na origem.** Se a fonte apaga um registro em vez de marcá-lo como inativo, a linha fica no banco. A conferência de contagem acusa a diferença, mas não a resolve.
+- **Registro que aparece atrasado.** Se a fonte publicar um registro com data de alteração anterior ao marcador (relógio defasado, gravação que demora a confirmar do lado dela), a leitura por alteração não o vê. O remédio usual é reler alguns minutos antes do marcador a cada execução; a gravação por chave já comporta isso, mas não está feito.
 - **Revisão antiga.** Número de anúncio corrigido há mais de 7 dias não é relido. A janela é um parâmetro de cada conector, porque cada plataforma revê os dias fechados por um prazo diferente.
 - **Uma origem por lead.** A atribuição liga o lead a uma campanha. Não há modelo de vários toques (primeiro clique, último clique, peso por posição).
 - **Uma credencial para o grupo.** O cliente HTTP usa uma credencial e passa a empresa como parâmetro, como numa conta gerenciadora. Se cada empresa tiver conta e credencial próprias, a mudança fica em `cli.py`, onde o cliente é criado.
@@ -160,6 +161,7 @@ conectores/
   cli.py         linha de comando
   alerta.py      aviso de falha (log e webhook)
   banco.py       conexão e migrações
+  config.py      configuração lida do ambiente e do .env
 simulador/       a API de terceiros simulada
 sql/             migrações: controle (ops, raw), dados (core) e visões (marts)
 tests/           testes contra PostgreSQL e contra a API por HTTP

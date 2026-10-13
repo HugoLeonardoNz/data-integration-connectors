@@ -56,7 +56,7 @@ A contagem na fonte é uma chamada a mais, feita depois que os dados entraram. S
 
 ## 13. Sem ORM e sem orquestrador
 
-O SQL está à vista em `sql/` e no motor, porque é ele que precisa ser revisado numa integração. Para agendar, o projeto traz um laço simples (`agendar`) e funciona com `cron`. Cinco rotinas não justificam um Airflow. Se passarem de algumas dezenas, ou se uma depender do término de outra, a conta muda.
+O SQL está à vista em `sql/` e no motor, porque é ele que precisa ser revisado numa integração. Para agendar, o projeto traz um laço simples (`agendar`) e funciona com `cron`. Cinco conectores não justificam um Airflow. Se passarem de algumas dezenas, ou se uma depender do término de outra, a conta muda.
 
 ## 14. As APIs são simuladas
 

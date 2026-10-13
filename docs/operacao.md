@@ -38,7 +38,7 @@ A fonte mudou o formato. O marcador não andou e o que já estava no banco não 
 3. Reaplique o que chegou durante a falha: `python -m conectores reprocessar <recurso> <id>`. A ordem não importa: se uma execução mais nova já trouxe o dado, o bruto antigo não passa por cima.
 4. Rode `python -m conectores sincronizar <recurso>` para trazer o que veio depois.
 
-**`falhou: ErroDeApi: 401` ou `403`**
+**`falhou: ErroDeApi: autenticação recusada: 401`** ou **`ErroDeApi: 403 em ...`**
 Credencial vencida ou sem permissão. Renove `API_CLIENT_ID` e `API_CLIENT_SECRET`.
 
 **`atrasada: Nh sem sucesso`**
